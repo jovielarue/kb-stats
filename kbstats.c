@@ -405,12 +405,21 @@ static int print_events(int fd) {
       code = event[i].code;
       const char *code_name = codename(type, code);
 
-      if (strstr(code_name, "?") == NULL) {
-        if (strcmp(last_code_name, code_name)) {
-          printf("%s\n", code_name);
-          last_code_name = code_name;
-        }
+      // create malloced code_name
+      // and ptr to code_name_dup (to_free) to use in strtok
+      char *to_free;
+      char *code_name_dup = strdup(code_name);
+      to_free = code_name_dup;
+
+      // if code_name !contains "?" and last_code_name != code_name
+      if (strstr(code_name, "?") == NULL && strcmp(last_code_name, code_name)) {
+        char *prefix = strtok(code_name_dup, "_");
+        char *delimited_name = strtok(NULL, "_");
+        printf("%s\n", delimited_name);
+        last_code_name = code_name;
       }
+
+      free(code_name_dup);
     }
   }
 
