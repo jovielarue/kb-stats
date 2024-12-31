@@ -122,38 +122,14 @@ static const struct query_mode *find_query_mode_by_name(const char *name) {
   return NULL;
 }
 
-/**
- * Find a query_mode based on a string identifier. The string can either
- * be a numerical value (e.g. "5") or the name of the event type in question
- * (e.g. "EV_SW").
- *
- * @param query_mode The mode to search for
- *
- * @return The requested code's numerical value, or negative on error.
- */
-static const struct query_mode *find_query_mode(const char *query_mode) {
-  return find_query_mode_by_name(query_mode);
-}
-
 static const char *const events[EV_MAX + 1] = {
-    [0 ... EV_MAX] = NULL, NAME_ELEMENT(EV_SYN),       NAME_ELEMENT(EV_KEY),
-    NAME_ELEMENT(EV_REL),  NAME_ELEMENT(EV_MSC),       NAME_ELEMENT(EV_LED),
-    NAME_ELEMENT(EV_SND),  NAME_ELEMENT(EV_REP),       NAME_ELEMENT(EV_FF),
-    NAME_ELEMENT(EV_PWR),  NAME_ELEMENT(EV_FF_STATUS), NAME_ELEMENT(EV_SW),
+    [0 ... EV_MAX] = NULL,
+    NAME_ELEMENT(EV_KEY),
 };
 
 static const int maxval[EV_MAX + 1] = {
     [0 ... EV_MAX] = -1,
-    [EV_SYN] = SYN_MAX,
     [EV_KEY] = KEY_MAX,
-    [EV_REL] = REL_MAX,
-    [EV_MSC] = MSC_MAX,
-    [EV_SW] = SW_MAX,
-    [EV_LED] = LED_MAX,
-    [EV_SND] = SND_MAX,
-    [EV_REP] = REP_MAX,
-    [EV_FF] = FF_MAX,
-    [EV_FF_STATUS] = FF_STATUS_MAX,
 };
 
 static const char *const keys[KEY_MAX + 1] = {
@@ -199,7 +175,6 @@ static const char *const keys[KEY_MAX + 1] = {
     NAME_ELEMENT(KEY_L),
     NAME_ELEMENT(KEY_SEMICOLON),
     NAME_ELEMENT(KEY_APOSTROPHE),
-    NAME_ELEMENT(KEY_GRAVE),
     NAME_ELEMENT(KEY_LEFTSHIFT),
     NAME_ELEMENT(KEY_BACKSLASH),
     NAME_ELEMENT(KEY_Z),
@@ -216,64 +191,17 @@ static const char *const keys[KEY_MAX + 1] = {
     NAME_ELEMENT(KEY_KPASTERISK),
     NAME_ELEMENT(KEY_LEFTALT),
     NAME_ELEMENT(KEY_SPACE),
-    NAME_ELEMENT(KEY_CAPSLOCK),
-    NAME_ELEMENT(KEY_NUMLOCK),
-    NAME_ELEMENT(KEY_SCROLLLOCK),
-    NAME_ELEMENT(KEY_KPMINUS),
     NAME_ELEMENT(KEY_RIGHTCTRL),
     NAME_ELEMENT(KEY_RIGHTALT),
-    NAME_ELEMENT(KEY_HOME),
     NAME_ELEMENT(KEY_UP),
-    NAME_ELEMENT(KEY_PAGEUP),
     NAME_ELEMENT(KEY_LEFT),
     NAME_ELEMENT(KEY_RIGHT),
     NAME_ELEMENT(KEY_END),
     NAME_ELEMENT(KEY_DOWN),
-    NAME_ELEMENT(KEY_PAGEDOWN),
     NAME_ELEMENT(KEY_INSERT),
     NAME_ELEMENT(KEY_DELETE),
-    NAME_ELEMENT(KEY_MACRO),
-    NAME_ELEMENT(KEY_MUTE),
-    NAME_ELEMENT(KEY_VOLUMEDOWN),
-    NAME_ELEMENT(KEY_VOLUMEUP),
-    NAME_ELEMENT(KEY_POWER),
-    NAME_ELEMENT(KEY_KPEQUAL),
-    NAME_ELEMENT(KEY_KPPLUSMINUS),
-    NAME_ELEMENT(KEY_PAUSE),
-    NAME_ELEMENT(KEY_LEFTMETA),
-    NAME_ELEMENT(KEY_RIGHTMETA),
-    NAME_ELEMENT(KEY_COMPOSE),
-    NAME_ELEMENT(KEY_STOP),
-    NAME_ELEMENT(KEY_AGAIN),
-    NAME_ELEMENT(KEY_PROPS),
-    NAME_ELEMENT(KEY_UNDO),
-    NAME_ELEMENT(KEY_FRONT),
-    NAME_ELEMENT(KEY_COPY),
-    NAME_ELEMENT(KEY_OPEN),
-    NAME_ELEMENT(KEY_PASTE),
-    NAME_ELEMENT(KEY_FIND),
-    NAME_ELEMENT(KEY_CUT),
-    NAME_ELEMENT(KEY_HELP),
-    NAME_ELEMENT(KEY_MENU),
-    NAME_ELEMENT(KEY_CALC),
-    NAME_ELEMENT(KEY_SETUP),
-    NAME_ELEMENT(KEY_SLEEP),
-    NAME_ELEMENT(KEY_WAKEUP),
-    NAME_ELEMENT(KEY_FILE),
-    NAME_ELEMENT(KEY_SENDFILE),
-    NAME_ELEMENT(KEY_DELETEFILE),
-    NAME_ELEMENT(KEY_BACK),
-    NAME_ELEMENT(KEY_FORWARD),
-    NAME_ELEMENT(KEY_REFRESH),
-    NAME_ELEMENT(KEY_EXIT),
-    NAME_ELEMENT(KEY_MOVE),
-    NAME_ELEMENT(KEY_EDIT),
-    NAME_ELEMENT(KEY_SCROLLUP),
-    NAME_ELEMENT(KEY_SCROLLDOWN),
     NAME_ELEMENT(KEY_KPLEFTPAREN),
     NAME_ELEMENT(KEY_KPRIGHTPAREN),
-    NAME_ELEMENT(KEY_BRIGHTNESSDOWN),
-    NAME_ELEMENT(KEY_BRIGHTNESSUP),
 #ifdef KEY_NUMERIC_0
     NAME_ELEMENT(KEY_NUMERIC_0),
     NAME_ELEMENT(KEY_NUMERIC_1),
@@ -288,70 +216,12 @@ static const char *const keys[KEY_MAX + 1] = {
     NAME_ELEMENT(KEY_NUMERIC_STAR),
     NAME_ELEMENT(KEY_NUMERIC_POUND),
 #endif
-
-#ifdef KEY_BRIGHTNESS_MIN
-    NAME_ELEMENT(KEY_BRIGHTNESS_MIN),
-#endif
-#ifdef KEY_BRIGHTNESS_MAX
-    NAME_ELEMENT(KEY_BRIGHTNESS_MAX),
-#endif
-};
-
-static const char *const repeats[REP_MAX + 1] = {
-    [0 ... REP_MAX] = NULL, NAME_ELEMENT(REP_DELAY), NAME_ELEMENT(REP_PERIOD)};
-
-static const char *const syns[SYN_MAX + 1] = {[0 ... SYN_MAX] = NULL,
-                                              NAME_ELEMENT(SYN_REPORT),
-                                              NAME_ELEMENT(SYN_CONFIG),
-                                              NAME_ELEMENT(SYN_MT_REPORT),
-                                              NAME_ELEMENT(SYN_DROPPED)};
-
-static const char *const forcestatus[FF_STATUS_MAX + 1] = {
-    [0 ... FF_STATUS_MAX] = NULL,
-    NAME_ELEMENT(FF_STATUS_STOPPED),
-    NAME_ELEMENT(FF_STATUS_PLAYING),
 };
 
 static const char *const *const names[EV_MAX + 1] = {
     [0 ... EV_MAX] = NULL,
-    [EV_SYN] = syns,
     [EV_KEY] = keys,
-    [EV_FF_STATUS] = forcestatus,
 };
-
-/**
- * Convert a string to a specific key/snd/led/sw code. The string can either
- * be the name of the key in question (e.g. "SW_DOCK") or the numerical
- * value, either as decimal (e.g. "5") or as hex (e.g. "0x5").
- *
- * @param mode The mode being queried (key, snd, led, sw)
- * @param kstr The string to parse and convert
- *
- * @return The requested code's numerical value, or negative on error.
- */
-static int get_keycode(const struct query_mode *query_mode, const char *kstr) {
-  if (isdigit(kstr[0])) {
-    unsigned long val;
-    errno = 0;
-    val = strtoul(kstr, NULL, 0);
-    if (errno) {
-      fprintf(stderr, "Could not interpret value %s\n", kstr);
-      return -1;
-    }
-    return (int)val;
-  } else {
-    const char *const *keynames = names[query_mode->event_type];
-    int i;
-
-    for (i = 0; i < query_mode->max; i++) {
-      const char *name = keynames[i];
-      if (name && strcmp(name, kstr) == 0)
-        return i;
-    }
-
-    return -1;
-  }
-}
 
 /**
  * Filter for the AutoDevProbe scandir on /dev/input.
@@ -439,10 +309,10 @@ static int usage(void) {
          program_invocation_short_name);
 
   printf("\n");
-  printf("<type> is one of: EV_KEY, EV_SW, EV_LED, EV_SND\n");
+  printf("<type> should be EV_KEY\n");
   printf(
       "<value> can either be a numerical value, or the textual name of the\n");
-  printf("key/switch/LED/sound being queried (e.g. SW_DOCK).\n");
+  printf("key being queried (e.g. KEY_5).\n");
 
   return EXIT_FAILURE;
 }
@@ -505,7 +375,7 @@ static int print_device_info(int fd) {
  * @return 0 on success or 1 otherwise.
  */
 static int print_events(int fd) {
-  struct input_event ev[64];
+  struct input_event event[64];
   int i, rd;
   fd_set rdfs;
 
@@ -516,7 +386,7 @@ static int print_events(int fd) {
     select(fd + 1, &rdfs, NULL, NULL, NULL);
     if (stop)
       break;
-    rd = read(fd, ev, sizeof(ev));
+    rd = read(fd, event, sizeof(event));
 
     if (rd < (int)sizeof(struct input_event)) {
       printf("expected %d bytes, got %d\n", (int)sizeof(struct input_event),
@@ -525,15 +395,18 @@ static int print_events(int fd) {
       return 1;
     }
 
+    /*char *prev_code_name;*/
     for (i = 0; i < rd / sizeof(struct input_event); i++) {
       unsigned int type, code;
 
-      type = ev[i].type;
-      code = ev[i].code;
+      type = event[i].type;
+      code = event[i].code;
       const char *code_name = codename(type, code);
 
-      if (code != SYN_REPORT && strcmp(code_name, "?")) {
+      /*printf("prev%s\n", prev_code_name);*/
+      if (strcmp(code_name, "?") != 0) {
         printf("%s\n", code_name);
+        /*strcpy(prev_code_name, code_name);*/
       }
     }
   }
@@ -580,8 +453,9 @@ static int do_capture(const char *device, int grab_flag) {
     filename = scan_devices();
     if (!filename)
       return usage();
-  } else
+  } else {
     filename = strdup(device);
+  }
 
   if (!filename)
     return EXIT_FAILURE;
@@ -635,8 +509,8 @@ error:
  * any known mode, on any valid keycode.
  *
  * @param device Path to the evdev device node that should be queried.
- * @param query_mode The event type that is being queried (e.g. key, switch)
- * @param keycode The code of the key/switch/sound/LED to be queried
+ * @param query_mode The event type that is being queried (should be EV_KEY)
+ * @param keycode The code of the key to be queried
  * @return 0 if the state bit is unset, 10 if the state bit is set, 1 on error.
  */
 static int query_device(const char *device, const struct query_mode *query_mode,
@@ -664,52 +538,6 @@ static int query_device(const char *device, const struct query_mode *query_mode,
   else
     return 0;
 }
-
-/**
- * Enter query mode. The requested event device will be queried for the state
- * of a particular switch/key/sound/LED.
- *
- * @param device The device to query.
- * @param mode The mode (event type) that is to be queried (snd, sw, key, led)
- * @param keycode The key code to query the state of.
- * @return 0 if the state bit is unset, 10 if the state bit is set.
- */
-static int do_query(const char *device, const char *event_type,
-                    const char *keyname) {
-  const struct query_mode *query_mode;
-  int keycode;
-
-  if (!device) {
-    fprintf(stderr, "Device argument is required for query.\n");
-    return usage();
-  }
-
-  query_mode = find_query_mode("EV_KEY");
-  if (!query_mode) {
-    fprintf(stderr, "Unrecognised event type: %s\n", event_type);
-    return usage();
-  }
-
-  keycode = get_keycode(query_mode, keyname);
-  if (keycode < 0) {
-    fprintf(stderr, "Unrecognised key name: %s\n", keyname);
-    return usage();
-  } else if (keycode > query_mode->max) {
-    fprintf(stderr, "Key %d is out of bounds.\n", keycode);
-    return EXIT_FAILURE;
-  }
-
-  return query_device(device, query_mode, keycode);
-}
-
-static const struct option long_options[] = {
-    {"grab", no_argument, &grab_flag, 1},
-    {"query", no_argument, NULL, MODE_QUERY},
-    {"version", no_argument, NULL, MODE_VERSION},
-    {
-        0,
-    },
-};
 
 int main(int argc, char **argv) {
   const char *device = NULL;
