@@ -38,6 +38,7 @@
 #define _GNU_SOURCE /* for asprintf */
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -382,6 +383,8 @@ static int print_events(int fd) {
   FD_ZERO(&rdfs);
   FD_SET(fd, &rdfs);
 
+  const char *last_code_name = "";
+
   while (!stop) {
     select(fd + 1, &rdfs, NULL, NULL, NULL);
     if (stop)
@@ -395,7 +398,6 @@ static int print_events(int fd) {
       return 1;
     }
 
-    /*char *prev_code_name;*/
     for (i = 0; i < rd / sizeof(struct input_event); i++) {
       unsigned int type, code;
 
@@ -403,10 +405,11 @@ static int print_events(int fd) {
       code = event[i].code;
       const char *code_name = codename(type, code);
 
-      /*printf("prev%s\n", prev_code_name);*/
-      if (strcmp(code_name, "?") != 0) {
-        printf("%s\n", code_name);
-        /*strcpy(prev_code_name, code_name);*/
+      if (strstr(code_name, "?") == NULL) {
+        if (strcmp(last_code_name, code_name)) {
+          printf("%s\n", code_name);
+          last_code_name = code_name;
+        }
       }
     }
   }
