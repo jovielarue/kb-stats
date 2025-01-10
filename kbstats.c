@@ -369,6 +369,45 @@ static int print_device_info(int fd) {
   return 0;
 }
 
+// currently dead code intended to debounce key presses
+// adapted from
+// https://stackoverflow.com/questions/48434575/switch-debouncing-logic-in-c
+#define CHECK_MSEC 5     // Read hardware every 5 msec
+#define PRESS_MSEC 10    // Stable time before registering pressed
+#define RELEASE_MSEC 100 // Stable time before registering released
+char *raw_delimited_key;
+
+// This holds the debounced state of the key.
+char *debounced_delimited_key;
+
+// Service routine called every CHECK_MSEC to debounce both edges
+void debounce_keypress(int *key_changed, char *key_pressed) {
+  static uint8_t Count = RELEASE_MSEC / CHECK_MSEC;
+  int raw_state;
+  *key_changed = 0;
+  key_pressed = debounced_delimited_key;
+  if (raw_delimited_key == debounced_delimited_key) {
+    // Set the timer which will allow a change from the current state.
+    if (debounced_delimited_key)
+      Count = RELEASE_MSEC / CHECK_MSEC;
+    else
+      Count = PRESS_MSEC / CHECK_MSEC;
+  } else {
+    // Key has changed - wait for new state to become stable.
+    if (--Count == 0) {
+      // Timer expired - accept the change.
+      debounced_delimited_key = raw_delimited_key;
+      *key_changed = 1;
+      key_pressed = debounced_delimited_key;
+      // And reset the timer.
+      if (debounced_delimited_key)
+        Count = RELEASE_MSEC / CHECK_MSEC;
+      else
+        Count = PRESS_MSEC / CHECK_MSEC;
+    }
+  }
+}
+
 /**
  * Print device events as they come in.
  *
@@ -414,8 +453,8 @@ static int print_events(int fd) {
       // if code_name !contains "?" and last_code_name != code_name
       if (strstr(code_name, "?") == NULL && strcmp(last_code_name, code_name)) {
         char *prefix = strtok(code_name_dup, "_");
-        char *delimited_name = strtok(NULL, "_");
-        printf("%s\n", delimited_name);
+        raw_delimited_key = strtok(NULL, "_");
+        printf("%s\n", raw_delimited_key);
         last_code_name = code_name;
       }
 
