@@ -375,35 +375,34 @@ static int print_device_info(int fd) {
 #define CHECK_MSEC 5     // Read hardware every 5 msec
 #define PRESS_MSEC 10    // Stable time before registering pressed
 #define RELEASE_MSEC 100 // Stable time before registering released
-char *raw_delimited_key;
-
+//
 // This holds the debounced state of the key.
 char *debounced_delimited_key;
 
 // Service routine called every CHECK_MSEC to debounce both edges
-void debounce_keypress(int *key_changed, char *key_pressed) {
-  static uint8_t Count = RELEASE_MSEC / CHECK_MSEC;
-  int raw_state;
+void debounce_keypress(int *key_changed, char *raw_delimited_key) {
+  printf("%s\n", raw_delimited_key);
+  static uint8_t Timer = RELEASE_MSEC / CHECK_MSEC;
   *key_changed = 0;
-  key_pressed = debounced_delimited_key;
+  raw_delimited_key = debounced_delimited_key;
   if (raw_delimited_key == debounced_delimited_key) {
     // Set the timer which will allow a change from the current state.
     if (debounced_delimited_key)
-      Count = RELEASE_MSEC / CHECK_MSEC;
+      Timer = RELEASE_MSEC / CHECK_MSEC;
     else
-      Count = PRESS_MSEC / CHECK_MSEC;
+      Timer = PRESS_MSEC / CHECK_MSEC;
   } else {
     // Key has changed - wait for new state to become stable.
-    if (--Count == 0) {
+    if (--Timer == 0) {
       // Timer expired - accept the change.
       debounced_delimited_key = raw_delimited_key;
       *key_changed = 1;
-      key_pressed = debounced_delimited_key;
+      raw_delimited_key = debounced_delimited_key;
       // And reset the timer.
       if (debounced_delimited_key)
-        Count = RELEASE_MSEC / CHECK_MSEC;
+        Timer = RELEASE_MSEC / CHECK_MSEC;
       else
-        Count = PRESS_MSEC / CHECK_MSEC;
+        Timer = PRESS_MSEC / CHECK_MSEC;
     }
   }
 }
@@ -450,11 +449,13 @@ static int print_events(int fd) {
       char *code_name_dup = strdup(code_name);
       to_free = code_name_dup;
 
-      // if code_name !contains "?" and last_code_name != code_name
-      if (strstr(code_name, "?") == NULL && strcmp(last_code_name, code_name)) {
+      int same_codes = strcmp(last_code_name, code_name);
+
+      // if code_name !contains "?"
+      if (strstr(code_name, "?") == NULL) {
         char *prefix = strtok(code_name_dup, "_");
-        raw_delimited_key = strtok(NULL, "_");
-        printf("%s\n", raw_delimited_key);
+        char *raw_delimited_key = strtok(NULL, "_");
+        debounce_keypress(&same_codes, raw_delimited_key);
         last_code_name = code_name;
       }
 
